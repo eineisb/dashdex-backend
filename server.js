@@ -50,3 +50,11 @@ app.post("/bridge", async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log("Dash.dex backend running on port " + PORT));
+
+// Keep alive ping every 14 minutes
+setInterval(() => {
+  const https = require("https");
+  https.get("https://dashdex-backend-production.up.railway.app/health", (res) => {
+    console.log("Keep alive ping:", res.statusCode);
+  }).on("error", (e) => console.log("Ping error:", e.message));
+}, 14 * 60 * 1000);
