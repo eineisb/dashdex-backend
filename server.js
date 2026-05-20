@@ -9,6 +9,10 @@ app.use(express.json());
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const KIT_KEY = process.env.KIT_KEY;
+if (!PRIVATE_KEY || !KIT_KEY) {
+  console.error("ERROR: PRIVATE_KEY or KIT_KEY missing!");
+  process.exit(1);
+}
 
 app.get("/health", (req, res) => {
   res.json({ status: "Dash.dex backend running!" });
@@ -54,7 +58,7 @@ app.listen(PORT, () => console.log("Dash.dex backend running on port " + PORT));
 // Keep alive ping every 14 minutes
 setInterval(() => {
   const https = require("https");
-  https.get("https://dashdex-backend-production.up.railway.app/health", (res) => {
+  https.get("https://dashdex-backend.onrender.com/health", (res) => {
     console.log("Keep alive ping:", res.statusCode);
   }).on("error", (e) => console.log("Ping error:", e.message));
 }, 14 * 60 * 1000);
