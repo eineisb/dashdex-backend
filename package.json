@@ -6,8 +6,8 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@circle-fin/adapter-viem-v2": "^1.8.3",
-    "@circle-fin/app-kit": "^1.4.1",
+    "@circle-fin/adapter-viem-v2": "^1.11.1",
+    "@circle-fin/app-kit": "^1.6.1",
     "cors": "^2.8.6",
     "express": "^5.2.1"
   }
