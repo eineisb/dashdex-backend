@@ -33,9 +33,9 @@ app.post("/swap", async (req, res) => {
     });
     res.json({ success: true, state: result.state, amountOut: result.amountOut, txHash: result.txHash });
   } catch (e) {
-    const detail = inspect(e, false, 6, false).slice(0, 1200);
-    console.error("SWAP ERROR:", detail);
-    res.json({ success: false, error: e.message + " || " + detail });
+    const full = inspect(e, false, null, false);
+    console.error("SWAP ERROR FULL:", full);
+    res.json({ success: false, error: e.message + " || " + full.slice(0, 4000) });
   }
 });
 
