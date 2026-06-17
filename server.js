@@ -62,3 +62,6 @@ setInterval(() => {
     console.log("Keep alive ping:", res.statusCode);
   }).on("error", (e) => console.log("Ping error:", e.message));
 }, 14 * 60 * 1000);
+
+const { privateKeyToAccount } = require("viem/accounts");
+console.log("Backend wallet address:", privateKeyToAccount(PRIVATE_KEY).address);
