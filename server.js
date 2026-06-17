@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { AppKit } = require("@circle-fin/app-kit");
 const { createViemAdapterFromPrivateKey } = require("@circle-fin/adapter-viem-v2");
+const { inspect } = require("util");
 
 const app = express();
 app.use(cors());
@@ -32,7 +33,9 @@ app.post("/swap", async (req, res) => {
     });
     res.json({ success: true, state: result.state, amountOut: result.amountOut, txHash: result.txHash });
   } catch (e) {
-    res.json({ success: false, error: e.message });
+    const detail = inspect(e, false, 6, false).slice(0, 1200);
+    console.error("SWAP ERROR:", detail);
+    res.json({ success: false, error: e.message + " || " + detail });
   }
 });
 
@@ -62,6 +65,3 @@ setInterval(() => {
     console.log("Keep alive ping:", res.statusCode);
   }).on("error", (e) => console.log("Ping error:", e.message));
 }, 14 * 60 * 1000);
-
-const { privateKeyToAccount } = require("viem/accounts");
-console.log("Backend wallet address:", privateKeyToAccount(PRIVATE_KEY).address);
