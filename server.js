@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { AppKit } = require("@circle-fin/app-kit");
 const { createViemAdapterFromPrivateKey } = require("@circle-fin/adapter-viem-v2");
+const { createWalletClient, createPublicClient, http } = require("viem");
 const { inspect } = require("util");
 
 const app = express();
@@ -12,7 +13,18 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const KIT_KEY = process.env.KIT_KEY;
 if (!PRIVATE_KEY || !KIT_KEY) {
   console.error("ERROR: PRIVATE_KEY or KIT_KEY missing!");
-  process.exit(1);
+}
+
+const RPC_URL = "https://5042002.rpc.thirdweb.com";
+
+function makeAdapter() {
+  return createViemAdapterFromPrivateKey({
+    privateKey: PRIVATE_KEY,
+    getWalletClient: ({ chain, account }) =>
+      createWalletClient({ transport: http(RPC_URL), account, chain }),
+    getPublicClient: ({ chain }) =>
+      createPublicClient({ transport: http(RPC_URL), chain }),
+  });
 }
 
 app.get("/health", (req, res) => {
@@ -22,7 +34,7 @@ app.get("/health", (req, res) => {
 app.post("/swap", async (req, res) => {
   try {
     const { tokenIn, tokenOut, amountIn } = req.body;
-    const adapter = createViemAdapterFromPrivateKey({ privateKey: PRIVATE_KEY });
+    const adapter = makeAdapter();
     const kit = new AppKit();
     const result = await kit.swap({
       from: { adapter, chain: "Arc_Testnet" },
@@ -42,7 +54,7 @@ app.post("/swap", async (req, res) => {
 app.post("/bridge", async (req, res) => {
   try {
     const { fromChain, toChain, amount } = req.body;
-    const adapter = createViemAdapterFromPrivateKey({ privateKey: PRIVATE_KEY });
+    const adapter = makeAdapter();
     const kit = new AppKit();
     const result = await kit.bridge({
       from: { adapter, chain: fromChain },
@@ -56,12 +68,7 @@ app.post("/bridge", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log("Dash.dex backend running on port " + PORT));
-
-// Keep alive ping every 14 minutes
-setInterval(() => {
-  const https = require("https");
-  https.get("https://dashdex-backend.onrender.com/health", (res) => {
-    console.log("Keep alive ping:", res.statusCode);
-  }).on("error", (e) => console.log("Ping error:", e.message));
-}, 14 * 60 * 1000);
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log("Dash.dex backend running on port " + PORT));
+}
+module.exports = app;
